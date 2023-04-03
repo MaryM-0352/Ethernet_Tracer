@@ -10,12 +10,14 @@ domain_name_format = re.compile(r"(\w+.\w+)")
 
 
 def version4(title: str):
+    'Проверяем версию полученного IP-адреса'
     check = title.split(' ')[-1][1:-1]
     myth = re.findall(ip_v4format, check)
     return len(myth[-1]) > 7
 
 
 def find_AS(ip: str, count: int) -> list:
+    'Получаем информацию о IP-адресе(AS, страна, провайдер)'
     reply = urlopen("https://ipinfo.io/" + ip + "/json")
     data = json.load(reply)
     if 'org' in data.keys():
@@ -30,6 +32,7 @@ def find_AS(ip: str, count: int) -> list:
 
 
 def find_ip(data: list, container: list, ip_version: re.Pattern):
+    'Извлекаем адреса из полученных после выполнения команды данных'
     for line in data:
         if line != '':
             ip = re.findall(ip_version, line)
