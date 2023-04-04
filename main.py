@@ -1,3 +1,4 @@
+import argparse
 import sys
 import subprocess
 import json
@@ -7,6 +8,12 @@ import re
 ip_v4format = re.compile(r"[\d{1-3}.\d{1-3}.\d{1-3}.\d{1-3}]+")
 ip_v6format = re.compile(r"[\d*a-zA-Z*:]{1,}")
 domain_name_format = re.compile(r"(\w+.\w+)")
+local_ip = [
+    ('10.0.0.0', '10.255.255.255'),
+    ('172.16.0.0', '172.31.255.255'),
+    ('192.168.0.0', '192.168.255.255'),
+    ('127.0.0.0', '127.255.255.255')
+]
 
 
 def version4(title: str):
@@ -40,12 +47,18 @@ def find_ip(data: list, container: list, ip_version: re.Pattern):
                 container.append(ip[-1])
 
 
+def is_local(ip: str):
+    for tup in local_ip:
+        if tup[0] < ip < tup[1]:
+            return True
+    return False
+
+
 def print_table(table: list):
     print(table[0])
-    print("Номер" + 5*" " + "|" + "IP" + 40*" " + "|" + "AS" + 20*" " + "|" + "Country" + 8*" " + "|" + "Provider")
-    for line in table[1:]:
-            string = [str(point) + 10*" " + "|" for point in line]
-            print("".join(string))
+    print("Номер | IP | AS | Country | Provider")
+    for line in table[1:-1]:
+        print(f'{line[0]} | {line[1]} | {line[2]} | {line[3]} | {line[4]}'.format())
 
 
 def tracert(address: str):
@@ -63,7 +76,10 @@ def tracert(address: str):
     count = 0
     for ip in ip_bin:
         count += 1
-        table.append(find_AS(ip, count))
+        if not is_local(ip):
+            table.append(find_AS(ip, count))
+        else:
+            table.append([count, ip, '-', '-', '-'])
 
     print_table(table)
     table.clear()
@@ -71,13 +87,14 @@ def tracert(address: str):
 
 
 def main():
-    args = sys.argv[1:]
-    for name in args:
-        tracert(name)
+    parser = argparse.ArgumentParser("Tracer")
+    parser.add_argument(
+        "(IP or host name)",
+        type=str,
+        help="Enter willing IP or host name")
+    arg = parser.parse_args()
+    tracert(arg.destination)
 
 
 if __name__ == "__main__":
     main()
-
-
-
