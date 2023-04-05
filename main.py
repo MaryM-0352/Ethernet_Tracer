@@ -89,7 +89,8 @@ def tracert(address: str):
 def main():
     parser = argparse.ArgumentParser("Tracer")
     parser.add_argument(
-        "(IP or host name)",
+        "destination",
+        metavar="(IP or host name)",
         type=str,
         help="Enter willing IP or host name")
     arg = parser.parse_args()
