@@ -1,5 +1,4 @@
 import argparse
-import sys
 import subprocess
 import json
 from urllib.request import urlopen
@@ -17,14 +16,14 @@ local_ip = [
 
 
 def version4(title: str):
-    'Проверяем версию полученного IP-адреса'
+    """Проверяем версию полученного IP-адреса"""
     check = title.split(' ')[-1][1:-1]
-    myth = re.findall(ip_v4format, check)
-    return len(myth[-1]) > 7
+    ip = re.findall(ip_v4format, check)
+    return len(ip[-1]) > 7
 
 
 def find_AS(ip: str, count: int) -> list:
-    'Получаем информацию о IP-адресе(AS, страна, провайдер)'
+    """Получаем информацию о IP-адресе(AS, страна, провайдер)"""
     reply = urlopen("https://ipinfo.io/" + ip + "/json")
     data = json.load(reply)
     if 'org' in data.keys():
@@ -39,7 +38,7 @@ def find_AS(ip: str, count: int) -> list:
 
 
 def find_ip(data: list, container: list, ip_version: re.Pattern):
-    'Извлекаем адреса из полученных после выполнения команды данных'
+    """Извлекаем адреса из полученных после выполнения команды данных"""
     for line in data:
         if line != '':
             ip = re.findall(ip_version, line)
@@ -48,14 +47,13 @@ def find_ip(data: list, container: list, ip_version: re.Pattern):
 
 
 def is_local(ip: str):
+    """Проверяем, относится ли IP-адрес к серым адресам"""
     for tup in local_ip:
-        if tup[0] < ip < tup[1]:
-            return True
-    return False
+        return tup[0] < ip < tup[1]
 
 
 def print_table(table: list):
-    print(table[0])
+    print(f"Вами введен:{table[0]}".format())
     print("Номер | IP | AS | Country | Provider")
     for line in table[1:-1]:
         print(f'{line[0]} | {line[1]} | {line[2]} | {line[3]} | {line[4]}'.format())
